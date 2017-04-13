@@ -11,18 +11,8 @@ check_deps() {
 }
 
 install_packages() {
-    echo Installing php...
-    sudo yum install -y php56 php56-gd php56-mcrypt php56-intl php56-mbstring php56-fpm php56-pdo php56-mysqlnd
-    echo Installing nginx...
-    sudo yum install -y nginx
-    echo Installing mysql...
-    sudo yum install -y mysql
-    echo Installing git...
-    sudo yum install -y git
-    echo Installing golang...
-    sudo yum install -y golang
-    echo Installing monit...
-    sudo yum install -y monit
+    echo Installing php, nginx, mysql, git, golang...
+    sudo yum install -y php56 php56-gd php56-mcrypt php56-intl php56-mbstring php56-fpm php56-pdo php56-mysqlnd nginx mysql git golang
 }
 
 test_mysql() {
@@ -277,3 +267,22 @@ configure_webhook() {
 
     return 0
 }
+
+install_cron() {
+
+    MAGENTO_CRON_SH_LOC=/usr/local/bin/magento.cron.sh
+
+    write_crontab_sh
+
+    echo "Installing cron"
+    CRONCMD="( sudo -u ${PHP_USER} crontab -l 2>/dev/null | grep -v ${MAGENTO_CRON_SH_LOC}; echo \"*/5 * * * * /bin/bash ${MAGENTO_CRON_SH_LOC}\" ) | sort - | uniq - | sudo -u $PHP_USER crontab -"
+
+    bash -c "$CRONCMD";
+
+    if [ ! $? ]; then
+        echo "Install cron failed"
+        return 1
+    fi
+    return 0
+}
+

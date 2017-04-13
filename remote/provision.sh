@@ -49,3 +49,8 @@ if ! configure_webhook; then
     echo "Webhook configuration failed"
     exit 1
 fi
+
+if ! install_cron; then
+    echo "Cron install failed"
+    exit 1
+fi

@@ -258,3 +258,21 @@ EOF
     fi
     return 0
 }
+
+
+write_crontab_sh() {
+    echo "Writing ${MAGENTO_CRON_SH_LOC}"
+
+    MAGENTO_BIN=$MAGENTO_LOCATION/bin/magento
+    PHP=$(which php)
+
+    cat <<EOF | sudo tee ${MAGENTO_CRON_SH_LOC} &> /dev/null
+#!/bin/bash
+echo \$(date) - Running magento cron
+
+$PHP $MAGENTO_BIN cron:run
+$PHP $MAGENTO_BIN setup:cron:run
+$PHP $MAGENTO_LOCATION/update/cron.php
+EOF
+}
+
