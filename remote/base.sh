@@ -1,3 +1,5 @@
+set -e
+
 check_deps() {
     if ! which yum &> /dev/null; then
         echo "yum not found on ${MAGENTO_HOST}"
@@ -89,7 +91,7 @@ install_plugin() {
 
     if [ -f ${MAGENTO_PLUGIN_DIRECTORY}/.git/config ]; then
         echo "Repo exists, pulling"
-        if ! sudo -u ${MAGENTO_PLUGIN_USER} GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -i ${KEY_LOC}" git -C "${MAGENTO_PLUGIN_DIRECTORY}" pull; then
+        if ! sudo -u ${MAGENTO_PLUGIN_USER} GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -i ${KEY_LOC}" git -C "${MAGENTO_PLUGIN_DIRECTORY}" pull origin master; then
             echo "Pull failed"
             return 1
         fi
@@ -188,6 +190,9 @@ configure_magento() {
         echo "Changing ownership failed"
         return 1
     fi
+
+    sudo -u ${PHP_USER} ${MAGENTO_BIN} setup:store-config:set --base-url=http://${MAGENTO_HOST}/
+    sudo -u ${PHP_USER} ${MAGENTO_BIN} setup:store-config:set --base-url-secure=https://${MAGENTO_HOST}/
 
     return 0
 }
